@@ -11,6 +11,7 @@ use SaaSFormation\Framework\Contracts\Infrastructure\WriteModel\ClientInterface;
 class MySQLClient implements ClientInterface
 {
     private \PDO $pdo;
+    private int $transactionCounter = 0;
 
     public function __construct(
         readonly string $mySQLUri,
@@ -25,24 +26,43 @@ class MySQLClient implements ClientInterface
 
     public function beginTransaction(): void
     {
-        $this->pdo->beginTransaction();
+        if ($this->transactionCounter === 0) {
+            $this->pdo->beginTransaction();
+        }
+        $this->transactionCounter++;
     }
 
     public function commitTransaction(): void
     {
-        $this->pdo->commit();
+        if ($this->transactionCounter === 0) {
+            throw new \Exception("No active transaction to commit.");
+        }
+
+        $this->transactionCounter--;
+
+        if ($this->transactionCounter === 0) {
+            $this->pdo->commit();
+        }
     }
 
     public function rollbackTransaction(): void
     {
-        $this->pdo->rollBack();
+        if ($this->transactionCounter === 0) {
+            throw new \Exception("No active transaction to rollback.");
+        }
+
+        $this->transactionCounter--;
+
+        if ($this->transactionCounter === 0) {
+            $this->pdo->rollBack();
+        }
     }
 
     public function save(Aggregate $aggregate): void
     {
         foreach ($aggregate->eventStream()->events() as $event) {
             $this->logTryingToPush($aggregate->id());
-            $this->pdo->beginTransaction();
+            $this->beginTransaction();
 
             try {
                 $this->pdo->prepare(
@@ -57,11 +77,11 @@ class MySQLClient implements ClientInterface
                     'created_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s.u'),
                 ]);
 
-                $this->pdo->commit();
+                $this->commitTransaction();
                 $this->logPushed($aggregate->id());
             } catch (\Throwable $e) {
                 $this->logFailedToPush($e, $aggregate->id());
-                $this->pdo->rollBack();
+                $this->rollbackTransaction();
                 throw new \Exception($e->getMessage());
             }
         }

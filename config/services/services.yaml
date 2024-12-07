@@ -9,3 +9,5 @@ services:
       $mySQLClientProvider: '@SaaSFormation\Framework\Projects\Infrastructure\MySQLClientProvider'
       $logger: '@default_logger'
       $uuidFactory: '@SaaSFormation\Framework\Contracts\Common\Identity\UUIDFactoryInterface'
+
+  SaaSFormation\Framework\Contracts\Domain\WriteModelRepositoryInterface: '@SaaSFormation\Framework\Projects\Infrastructure\MySQLBasedWriteModelRepository'

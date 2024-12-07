@@ -78,6 +78,47 @@ class MySQLClient implements ClientInterface
         return $query->fetchAll(\PDO::FETCH_ASSOC);
     }
 
+    public function migrationsTableExists(): bool
+    {
+        return $this->pdo->exec("SHOW TABLES LIKE 'migrations'") === 1;
+    }
+
+    public function createMigrationsTable(): void
+    {
+        $this->pdo->exec(
+            "CREATE TABLE `migrations` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `migration_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `execution_date` datetime(6) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `migration_name` (`migration_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;"
+        );
+    }
+
+    public function isMigrationExecuted(string $name): bool
+    {
+        $query = $this->pdo->prepare("SELECT * FROM migrations WHERE migration_name = :migration_name");
+        $query->execute([
+            'migration_name' => $name,
+        ]);
+
+        return count($query->fetchAll()) > 0;
+    }
+
+    public function saveMigrationAsExecuted(string $name): void
+    {
+        $this->pdo->prepare("INSERT INTO migrations (migration_name, execution_date) VALUES (:migration_name, :execution_date)")->execute([
+            'migration_name' => $name,
+            'execution_date' => (new \DateTimeImmutable())->format('Y-m-d H:i:s.u'),
+        ]);
+    }
+
+    public function raw(string $query): void
+    {
+        $this->pdo->exec($query);
+    }
+
     /**
      * @param IdInterface $aggregateId
      * @return void

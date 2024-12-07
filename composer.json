@@ -16,7 +16,8 @@
     "require": {
         "php": "^8.3",
         "saasformation/framework-contracts": "^1.0",
-        "psr/log": "^3.0"
+        "psr/log": "^3.0",
+        "symfony/yaml": "^7"
     },
     "extra": {
         "branch-alias": {

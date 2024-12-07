@@ -14,6 +14,12 @@ services:
     alias: 'SaaSFormation\Framework\MySQLBasedWriteModel\Infrastructure\WriteModel\MySQLClientProvider'
     public: true
 
+  SaaSFormation\Framework\MySQLBasedWriteModel\Infrastructure\WriteModel\MySQLMigrationsRepository:
+    arguments:
+      $mySQLClientProvider: '@SaaSFormation\Framework\MySQLBasedWriteModel\Infrastructure\WriteModel\MySQLClientProvider'
+      $logger: '@default_logger'
+      $UUIDFactory: '@SaaSFormation\Framework\Contracts\Common\Identity\UUIDFactoryInterface'
+
   SaaSFormation\Framework\MySQLBasedWriteModel\UI\Cli\Migrations\MigrateCommand:
     public: true
 

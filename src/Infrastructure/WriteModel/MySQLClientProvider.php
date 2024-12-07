@@ -5,8 +5,9 @@ namespace SaaSFormation\Framework\MySQLBasedWriteModel\Infrastructure\WriteModel
 use Psr\Log\LoggerInterface;
 use SaaSFormation\Framework\Contracts\Common\Identity\UUIDFactoryInterface;
 use SaaSFormation\Framework\Contracts\Infrastructure\EnvVarsManagerInterface;
+use SaaSFormation\Framework\Contracts\Infrastructure\WriteModel\ClientProviderInterface;
 
-readonly class MySQLClientProvider
+readonly class MySQLClientProvider implements ClientProviderInterface
 {
     public function __construct(private EnvVarsManagerInterface $envVarsManager)
     {

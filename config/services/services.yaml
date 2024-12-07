@@ -10,4 +10,5 @@ services:
       $logger: '@default_logger'
       $uuidFactory: '@SaaSFormation\Framework\Contracts\Common\Identity\UUIDFactoryInterface'
 
+  SaaSFormation\Framework\Contracts\Infrastructure\WriteModel\ClientProviderInterface: '@SaaSFormation\Framework\MySQLBasedWriteModel\Infrastructure\WriteModel\MySQLClientProvider'
   SaaSFormation\Framework\Contracts\Domain\WriteModel\RepositoryInterface: '@SaaSFormation\Framework\MySQLBasedWriteModel\Infrastructure\WriteModel\MySQLBasedRepository'

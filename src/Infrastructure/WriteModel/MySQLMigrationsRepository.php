@@ -2,9 +2,6 @@
 
 namespace SaaSFormation\Framework\MySQLBasedWriteModel\Infrastructure\WriteModel;
 
-use Psr\Log\LoggerInterface;
-use SaaSFormation\Framework\Contracts\Common\Identity\UUIDFactoryInterface;
-
 class MySQLMigrationsRepository
 {
     private MySQLClient $mySQLClient;

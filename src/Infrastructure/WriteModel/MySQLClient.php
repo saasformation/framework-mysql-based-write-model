@@ -21,7 +21,6 @@ class MySQLClient implements ClientInterface
     )
     {
         $this->pdo = new \PDO($mySQLUri, $mySQLUsername, $mySQLPassword);
-        $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
     }
 
     public function beginTransaction(): void
@@ -75,25 +74,35 @@ class MySQLClient implements ClientInterface
             'id' => $aggregateId->humanReadable(),
         ]);
 
-        return $query->fetchAll(\PDO::FETCH_ASSOC);
+        $results = $query->fetchAll(\PDO::FETCH_ASSOC);
+        $query->closeCursor();
+
+        return $results;
     }
 
     public function migrationsTableExists(): bool
     {
-        return $this->pdo->exec("SHOW TABLES LIKE 'migrations'") === 1;
+        $stm = $this->pdo->prepare("SHOW TABLES LIKE 'migrations'");
+        $stm->execute();
+
+        $results = $stm->fetchAll(\PDO::FETCH_ASSOC);
+        $stm->closeCursor();
+
+        return !empty($results);
     }
 
     public function createMigrationsTable(): void
     {
-        $this->pdo->exec(
+        $stm = $this->pdo->prepare(
             "CREATE TABLE `migrations` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `migration_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `execution_date` datetime(6) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `migration_name` (`migration_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;"
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci"
         );
+        $stm->execute();
     }
 
     public function isMigrationExecuted(string $name): bool
@@ -103,7 +112,10 @@ class MySQLClient implements ClientInterface
             'migration_name' => $name,
         ]);
 
-        return count($query->fetchAll()) > 0;
+        $results = count($query->fetchAll()) > 0;
+        $query->closeCursor();
+
+        return $results;
     }
 
     public function saveMigrationAsExecuted(string $name): void
@@ -116,7 +128,9 @@ class MySQLClient implements ClientInterface
 
     public function raw(string $query): void
     {
-        $this->pdo->exec($query);
+        $stm = $this->pdo->prepare($query);
+        $stm->execute();
+        $stm->closeCursor();
     }
 
     /**

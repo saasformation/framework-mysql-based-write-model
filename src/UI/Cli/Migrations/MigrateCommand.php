@@ -16,7 +16,7 @@ readonly class MigrateCommand extends Command
 
     public function cliLine(): string
     {
-        return "writemodel:schema:migrate";
+        return "writemodel:schema:migrate --config=config.yml";
     }
 
     public function description(): string
@@ -35,8 +35,10 @@ readonly class MigrateCommand extends Command
             $output->info("Migrations table already exists");
         }
 
+        $configPath = $input->options()->find('config')->value();
+
         /** @var array{"paths", array<int, string>} $parsedYaml */
-        $parsedYaml = Yaml::parseFile("project/config/migrations-config.yaml");
+        $parsedYaml = Yaml::parseFile($configPath);
 
         $output->info("Looking for migrations");
         $totalMigrationsExecuted = 0;

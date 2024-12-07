@@ -3,6 +3,8 @@ services:
     public: true
     arguments:
       $envVarsManager: '@default_env_vars_manager'
+      $logger: '@default_logger'
+      $UUIDFactory: '@SaaSFormation\Framework\Contracts\Common\Identity\UUIDFactoryInterface'
 
   SaaSFormation\Framework\MySQLBasedWriteModel\Infrastructure\WriteModel\MySQLBasedRepository:
     arguments:
@@ -17,8 +19,6 @@ services:
   SaaSFormation\Framework\MySQLBasedWriteModel\Infrastructure\WriteModel\MySQLMigrationsRepository:
     arguments:
       $mySQLClientProvider: '@SaaSFormation\Framework\MySQLBasedWriteModel\Infrastructure\WriteModel\MySQLClientProvider'
-      $logger: '@default_logger'
-      $UUIDFactory: '@SaaSFormation\Framework\Contracts\Common\Identity\UUIDFactoryInterface'
 
   SaaSFormation\Framework\MySQLBasedWriteModel\UI\Cli\Migrations\MigrateCommand:
     public: true

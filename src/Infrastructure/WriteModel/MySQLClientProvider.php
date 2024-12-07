@@ -9,11 +9,9 @@ use SaaSFormation\Framework\Contracts\Infrastructure\WriteModel\ClientProviderIn
 
 readonly class MySQLClientProvider implements ClientProviderInterface
 {
-    public function __construct(private EnvVarsManagerInterface $envVarsManager)
-    {
-    }
+    private ?MySQLClient $mySQLClient;
 
-    public function provide(LoggerInterface $logger, UUIDFactoryInterface $UUIDFactory): MySQLClient
+    public function __construct(private EnvVarsManagerInterface $envVarsManager, LoggerInterface $logger, UUIDFactoryInterface $UUIDFactory)
     {
         $mysqlUri = $this->envVarsManager->get('MYSQL_URI');
         $mysqlUsername = $this->envVarsManager->get('MYSQL_USERNAME');
@@ -31,6 +29,11 @@ readonly class MySQLClientProvider implements ClientProviderInterface
             throw new \InvalidArgumentException('MYSQL_PASSWORD must be a string');
         }
 
-        return new MySQLClient($mysqlUri, $mysqlUsername, $mysqlPassword, $logger, $UUIDFactory);
+        $this->mySQLClient = new MySQLClient($mysqlUri, $mysqlUsername, $mysqlPassword, $logger, $UUIDFactory);
+    }
+
+    public function provide(): MySQLClient
+    {
+        return $this->mySQLClient;
     }
 }

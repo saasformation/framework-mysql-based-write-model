@@ -9,9 +9,9 @@ class MySQLMigrationsRepository
 {
     private MySQLClient $mySQLClient;
 
-    public function __construct(MySQLClientProvider $mySQLClientProvider, LoggerInterface $logger, UUIDFactoryInterface $UUIDFactory)
+    public function __construct(MySQLClientProvider $mySQLClientProvider)
     {
-        $this->mySQLClient = $mySQLClientProvider->provide($logger, $UUIDFactory);
+        $this->mySQLClient = $mySQLClientProvider->provide();
     }
 
     public function migrationsTableExists(): bool

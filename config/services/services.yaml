@@ -1,13 +1,13 @@
 services:
-  SaaSFormation\Framework\Projects\Infrastructure\MySQLClientProvider:
+  SaaSFormation\Framework\MySQLBasedWriteModel\Infrastructure\WriteModel\MySQLClientProvider:
     public: true
     arguments:
       $envVarsManager: '@default_env_vars_manager'
 
-  SaaSFormation\Framework\Projects\Infrastructure\MySQLBasedWriteModelRepository:
+  SaaSFormation\Framework\MySQLBasedWriteModel\Infrastructure\WriteModel\MySQLBasedRepository:
     arguments:
-      $mySQLClientProvider: '@SaaSFormation\Framework\Projects\Infrastructure\MySQLClientProvider'
+      $mySQLClientProvider: '@SaaSFormation\Framework\MySQLBasedWriteModel\Infrastructure\WriteModel\MySQLClientProvider'
       $logger: '@default_logger'
       $uuidFactory: '@SaaSFormation\Framework\Contracts\Common\Identity\UUIDFactoryInterface'
 
-  SaaSFormation\Framework\Contracts\Domain\WriteModelRepositoryInterface: '@SaaSFormation\Framework\Projects\Infrastructure\MySQLBasedWriteModelRepository'
+  SaaSFormation\Framework\Contracts\Domain\WriteModel\RepositoryInterface: '@SaaSFormation\Framework\MySQLBasedWriteModel\Infrastructure\WriteModel\MySQLBasedRepository'

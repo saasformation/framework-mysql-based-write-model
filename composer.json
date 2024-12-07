@@ -1,0 +1,26 @@
+{
+    "name": "saasformation/framework-mysql-based-write-model",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "SaaSFormation",
+            "email": "info@saasformation.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "SaaSFormation\\Framework\\MySQLBasedWriteModel\\": "src"
+        }
+    },
+    "require": {
+        "php": "^8.3",
+        "saasformation/framework-contracts": "^1.0",
+        "psr/log": "^3.0"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-main": "1.x-dev"
+        }
+    }
+}

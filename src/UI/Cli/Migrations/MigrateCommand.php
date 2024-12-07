@@ -38,19 +38,19 @@ readonly class MigrateCommand extends Command
         $configPath = $input->options()->find('config')->value();
 
         /** @var array{"paths", array<int, string>} $parsedYaml */
-        $parsedYaml = Yaml::parseFile($configPath);
+        $parsedYaml = Yaml::parseFile($configPath . '/migrations-config.yaml');
 
         $output->info("Looking for migrations");
         $totalMigrationsExecuted = 0;
-        foreach($parsedYaml as $path) {
-            $files = scandir($path);
+        foreach($parsedYaml["paths"] as $path) {
+            $files = scandir($configPath . '/' . $path);
 
             foreach ($files as $file) {
                 if ($file !== '.' && $file !== '..') {
                     $migrationName = explode('.', $file)[0];
                     if(!$this->repository->isMigrationExecuted($migrationName)) {
                         $output->info("Migration $migrationName has not been executed; executing...");
-                        $this->repository->runMigration($migrationName, file_get_contents($file));
+                        $this->repository->runMigration($migrationName, file_get_contents($configPath . '/' . $path . '/' . $file));
                         $totalMigrationsExecuted++;
                         $output->info("Migration $migrationName executed");
                     }

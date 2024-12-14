@@ -3,10 +3,10 @@
 namespace SaaSFormation\Framework\MySQLBasedWriteModel\Infrastructure\WriteModel;
 
 use Psr\Log\LoggerInterface;
-use SaaSFormation\Framework\Contracts\Common\Identity\IdInterface;
-use SaaSFormation\Framework\Contracts\Common\Identity\UUIDFactoryInterface;
-use SaaSFormation\Framework\Contracts\Domain\Aggregate;
 use SaaSFormation\Framework\Contracts\Infrastructure\WriteModel\ClientInterface;
+use SaaSFormation\Framework\SharedKernel\Common\Identity\IdInterface;
+use SaaSFormation\Framework\SharedKernel\Common\Identity\UUIDFactoryInterface;
+use SaaSFormation\Framework\SharedKernel\Domain\AbstractAggregate;
 
 class MySQLClient implements ClientInterface
 {
@@ -58,29 +58,36 @@ class MySQLClient implements ClientInterface
         }
     }
 
-    public function save(Aggregate $aggregate): void
+    public function save(AbstractAggregate $aggregate): void
     {
-        foreach ($aggregate->eventStream()->events() as $event) {
-            $this->logTryingToPush($aggregate->id());
+        foreach ($aggregate->eventStream->events() as $event) {
+            $this->logTryingToPush($aggregate->id);
             $this->beginTransaction();
 
             try {
                 $this->pdo->prepare(
-                    "INSERT INTO eventstore (id, aggregate_id, aggregate_code, event_code, event_version, event_data, created_at) values (:id, :aggregate_id, :aggregate_code, :event_code, :event_version, :event_data, :created_at)"
+                    "INSERT INTO eventstore (
+                        id, aggregate_id, aggregate_code, event_code, event_version, event_data, request_id, correlation_id, generator_command_id, created_at
+                        ) values (
+                                  :id, :aggregate_id, :aggregate_code, :event_code, :event_version, :event_data, :request_id, :correlation_id, :generator_command_id, :created_at
+                      )"
                 )->execute([
-                    'id' => $event->id() ? $event->id()->humanReadable() : $this->uuidFactory->generate()->humanReadable(),
-                    'aggregate_id' => $aggregate->id()->humanReadable(),
-                    'aggregate_code' => $aggregate->code(),
-                    'event_code' => $event->code(),
-                    'event_version' => $event->version(),
+                    'id' => $event->domainEventId ? $event->domainEventId->humanReadable() : $this->uuidFactory->generate()->humanReadable(),
+                    'aggregate_id' => $aggregate->id->humanReadable(),
+                    'aggregate_code' => $aggregate->aggregateCode(),
+                    'event_code' => $event->domainEventCode(),
+                    'event_version' => $event->domainEventVersion(),
                     'event_data' => json_encode($event->toArray()),
+                    'request_id' => $event->requestId,
+                    'correlation_id' => $event->correlationId,
+                    'generator_command_id' => $event->generatorCommandId,
                     'created_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s.u'),
                 ]);
 
                 $this->commitTransaction();
-                $this->logPushed($aggregate->id());
+                $this->logPushed($aggregate->id);
             } catch (\Throwable $e) {
-                $this->logFailedToPush($e, $aggregate->id());
+                $this->logFailedToPush($e, $aggregate->id);
                 $this->rollbackTransaction();
                 throw new \Exception($e->getMessage());
             }

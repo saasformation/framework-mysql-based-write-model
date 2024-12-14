@@ -3,9 +3,9 @@
 namespace SaaSFormation\Framework\MySQLBasedWriteModel\Infrastructure\WriteModel;
 
 use Psr\Log\LoggerInterface;
-use SaaSFormation\Framework\Contracts\Common\Identity\UUIDFactoryInterface;
 use SaaSFormation\Framework\Contracts\Infrastructure\EnvVarsManagerInterface;
 use SaaSFormation\Framework\Contracts\Infrastructure\WriteModel\ClientProviderInterface;
+use SaaSFormation\Framework\SharedKernel\Common\Identity\UUIDFactoryInterface;
 
 readonly class MySQLClientProvider implements ClientProviderInterface
 {

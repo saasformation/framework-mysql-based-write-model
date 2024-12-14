@@ -3,10 +3,10 @@
 namespace SaaSFormation\Framework\MySQLBasedWriteModel\Infrastructure\WriteModel;
 
 use Psr\Log\LoggerInterface;
-use SaaSFormation\Framework\Contracts\Common\Identity\IdInterface;
-use SaaSFormation\Framework\Contracts\Common\Identity\UUIDFactoryInterface;
-use SaaSFormation\Framework\Contracts\Domain\Aggregate;
-use SaaSFormation\Framework\Contracts\Domain\WriteModel\RepositoryInterface;
+use SaaSFormation\Framework\SharedKernel\Common\Identity\IdInterface;
+use SaaSFormation\Framework\SharedKernel\Common\Identity\UUIDFactoryInterface;
+use SaaSFormation\Framework\SharedKernel\Domain\AbstractAggregate;
+use SaaSFormation\Framework\SharedKernel\Domain\WriteModel\RepositoryInterface;
 
 readonly class MySQLBasedRepository implements RepositoryInterface
 {
@@ -17,7 +17,7 @@ readonly class MySQLBasedRepository implements RepositoryInterface
         $this->client = $this->mySQLClientProvider->provide($this->logger, $this->uuidFactory);
     }
 
-    public function save(Aggregate $aggregate): void
+    public function save(AbstractAggregate $aggregate): void
     {
         $this->client->save($aggregate);
     }

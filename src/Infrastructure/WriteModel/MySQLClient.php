@@ -60,8 +60,8 @@ class MySQLClient implements ClientInterface
 
     public function save(AbstractAggregate $aggregate): void
     {
-        foreach ($aggregate->eventStream->events() as $event) {
-            $this->logTryingToPush($aggregate->id);
+        foreach ($aggregate->getEventStream()->events() as $event) {
+            $this->logTryingToPush($aggregate->getId());
             $this->beginTransaction();
 
             try {
@@ -72,22 +72,22 @@ class MySQLClient implements ClientInterface
                                   :id, :aggregate_id, :aggregate_code, :event_code, :event_version, :event_data, :request_id, :correlation_id, :generator_command_id, :created_at
                       )"
                 )->execute([
-                    'id' => $event->domainEventId ? $event->domainEventId->humanReadable() : $this->uuidFactory->generate()->humanReadable(),
-                    'aggregate_id' => $aggregate->id->humanReadable(),
+                    'id' => $event->getDomainEventId() ? $event->getDomainEventId()->humanReadable() : $this->uuidFactory->generate()->humanReadable(),
+                    'aggregate_id' => $aggregate->getId()->humanReadable(),
                     'aggregate_code' => $aggregate->aggregateCode(),
-                    'event_code' => $event->domainEventCode(),
-                    'event_version' => $event->domainEventVersion(),
+                    'event_code' => $event->getDomainEventCode(),
+                    'event_version' => $event->getDomainEventVersion(),
                     'event_data' => json_encode($event->toArray()),
-                    'request_id' => $event->requestId,
-                    'correlation_id' => $event->correlationId,
-                    'generator_command_id' => $event->generatorCommandId,
+                    'request_id' => $event->getRequestId(),
+                    'correlation_id' => $event->getCorrelationId(),
+                    'generator_command_id' => $event->getGeneratorCommandId(),
                     'created_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s.u'),
                 ]);
 
                 $this->commitTransaction();
-                $this->logPushed($aggregate->id);
+                $this->logPushed($aggregate->getId());
             } catch (\Throwable $e) {
-                $this->logFailedToPush($e, $aggregate->id);
+                $this->logFailedToPush($e, $aggregate->getId());
                 $this->rollbackTransaction();
                 throw new \Exception($e->getMessage());
             }

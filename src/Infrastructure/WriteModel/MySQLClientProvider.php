@@ -9,7 +9,7 @@ use SaaSFormation\Framework\SharedKernel\Common\Identity\UUIDFactoryInterface;
 
 readonly class MySQLClientProvider implements ClientProviderInterface
 {
-    private ?MySQLClient $mySQLClient;
+    private MySQLClient $mySQLClient;
 
     public function __construct(private EnvVarsManagerInterface $envVarsManager, LoggerInterface $logger, UUIDFactoryInterface $UUIDFactory)
     {

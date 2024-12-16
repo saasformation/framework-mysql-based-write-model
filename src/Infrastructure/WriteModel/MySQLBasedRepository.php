@@ -12,9 +12,9 @@ readonly class MySQLBasedRepository implements RepositoryInterface
 {
     private MySQLClient $client;
 
-    public function __construct(private MySQLClientProvider $mySQLClientProvider, private LoggerInterface $logger, private UUIDFactoryInterface $uuidFactory)
+    public function __construct(private MySQLClientProvider $mySQLClientProvider)
     {
-        $this->client = $this->mySQLClientProvider->provide($this->logger, $this->uuidFactory);
+        $this->client = $this->mySQLClientProvider->provide();
     }
 
     public function save(AbstractAggregate $aggregate): void

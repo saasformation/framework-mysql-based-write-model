@@ -7,6 +7,7 @@ use SaaSFormation\Framework\Contracts\Infrastructure\WriteModel\ClientInterface;
 use SaaSFormation\Framework\SharedKernel\Common\Identity\IdInterface;
 use SaaSFormation\Framework\SharedKernel\Common\Identity\UUIDFactoryInterface;
 use SaaSFormation\Framework\SharedKernel\Domain\AbstractAggregate;
+use SaaSFormation\Framework\SharedKernel\Domain\Messages\DomainEventInterface;
 
 class MySQLClient implements ClientInterface
 {
@@ -14,10 +15,10 @@ class MySQLClient implements ClientInterface
     private int $transactionCounter = 0;
 
     public function __construct(
-        readonly string $mySQLUri,
-        readonly string $mySQLUsername,
-        readonly string $mySQLPassword,
-        private readonly LoggerInterface $logger,
+        readonly string                       $mySQLUri,
+        readonly string                       $mySQLUsername,
+        readonly string                       $mySQLPassword,
+        private readonly LoggerInterface      $logger,
         private readonly UUIDFactoryInterface $uuidFactory
     )
     {
@@ -58,39 +59,37 @@ class MySQLClient implements ClientInterface
         }
     }
 
-    public function save(AbstractAggregate $aggregate): void
+    public function save(DomainEventInterface $domainEvent): void
     {
-        foreach ($aggregate->getEventStream()->events() as $event) {
-            $this->logTryingToPush($aggregate->getId());
-            $this->beginTransaction();
+        $this->logTryingToPush($domainEvent->getAggregateId());
+        $this->beginTransaction();
 
-            try {
-                $this->pdo->prepare(
-                    "INSERT INTO eventstore (
+        try {
+            $this->pdo->prepare(
+                "INSERT INTO eventstore (
                         id, aggregate_id, aggregate_code, event_code, event_version, event_data, request_id, correlation_id, generator_command_id, created_at
                         ) values (
                                   :id, :aggregate_id, :aggregate_code, :event_code, :event_version, :event_data, :request_id, :correlation_id, :generator_command_id, :created_at
                       )"
-                )->execute([
-                    'id' => $event->getDomainEventId() ? $event->getDomainEventId()->humanReadable() : $this->uuidFactory->generate()->humanReadable(),
-                    'aggregate_id' => $aggregate->getId()->humanReadable(),
-                    'aggregate_code' => $aggregate->aggregateCode(),
-                    'event_code' => $event->getDomainEventCode(),
-                    'event_version' => $event->getDomainEventVersion(),
-                    'event_data' => json_encode($event->toArray()),
-                    'request_id' => $event->getRequestId(),
-                    'correlation_id' => $event->getCorrelationId(),
-                    'generator_command_id' => $event->getGeneratorCommandId(),
-                    'created_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s.u'),
-                ]);
+            )->execute([
+                'id' => $domainEvent->getDomainEventId() ? $domainEvent->getDomainEventId()->humanReadable() : $this->uuidFactory->generate()->humanReadable(),
+                'aggregate_id' => $domainEvent->getAggregateId()->humanReadable(),
+                'aggregate_code' => $domainEvent->getAggregateCode(),
+                'event_code' => $domainEvent->getDomainEventCode(),
+                'event_version' => $domainEvent->getDomainEventVersion(),
+                'event_data' => json_encode($domainEvent->toArray()),
+                'request_id' => $domainEvent->getRequestId(),
+                'correlation_id' => $domainEvent->getCorrelationId(),
+                'generator_command_id' => $domainEvent->getGeneratorCommandId(),
+                'created_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s.u'),
+            ]);
 
-                $this->commitTransaction();
-                $this->logPushed($aggregate->getId());
-            } catch (\Throwable $e) {
-                $this->logFailedToPush($e, $aggregate->getId());
-                $this->rollbackTransaction();
-                throw new \Exception($e->getMessage());
-            }
+            $this->commitTransaction();
+            $this->logPushed($domainEvent->getAggregateId());
+        } catch (\Throwable $e) {
+            $this->logFailedToPush($e, $domainEvent->getAggregateId());
+            $this->rollbackTransaction();
+            throw new \Exception($e->getMessage());
         }
     }
 

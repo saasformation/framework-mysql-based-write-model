@@ -2,9 +2,7 @@
 
 namespace SaaSFormation\Framework\MySQLBasedWriteModel\Infrastructure\WriteModel;
 
-use Psr\Log\LoggerInterface;
 use SaaSFormation\Framework\SharedKernel\Common\Identity\IdInterface;
-use SaaSFormation\Framework\SharedKernel\Common\Identity\UUIDFactoryInterface;
 use SaaSFormation\Framework\SharedKernel\Domain\AbstractAggregate;
 use SaaSFormation\Framework\SharedKernel\Domain\WriteModel\RepositoryInterface;
 

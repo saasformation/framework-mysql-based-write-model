@@ -9,8 +9,6 @@ services:
   SaaSFormation\Framework\MySQLBasedWriteModel\Infrastructure\WriteModel\MySQLBasedRepository:
     arguments:
       $mySQLClientProvider: '@SaaSFormation\Framework\MySQLBasedWriteModel\Infrastructure\WriteModel\MySQLClientProvider'
-      $logger: '@default_logger'
-      $uuidFactory: '@SaaSFormation\Framework\Contracts\Common\Identity\UUIDFactoryInterface'
 
   SaaSFormation\Framework\Contracts\Infrastructure\WriteModel\ClientProviderInterface:
     alias: 'SaaSFormation\Framework\MySQLBasedWriteModel\Infrastructure\WriteModel\MySQLClientProvider'

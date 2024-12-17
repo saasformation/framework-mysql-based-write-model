@@ -2,6 +2,7 @@
 
 namespace SaaSFormation\Framework\MySQLBasedWriteModel\Infrastructure\WriteModel;
 
+use Assert\Assert;
 use Psr\Log\LoggerInterface;
 use SaaSFormation\Framework\Contracts\Infrastructure\WriteModel\ClientInterface;
 use SaaSFormation\Framework\SharedKernel\Common\Identity\IdInterface;
@@ -18,8 +19,7 @@ class MySQLClient implements ClientInterface
         readonly string                       $mySQLUri,
         readonly string                       $mySQLUsername,
         readonly string                       $mySQLPassword,
-        private readonly LoggerInterface      $logger,
-        private readonly UUIDFactoryInterface $uuidFactory
+        private readonly LoggerInterface      $logger
     )
     {
         $this->pdo = new \PDO($mySQLUri, $mySQLUsername, $mySQLPassword);
@@ -64,6 +64,11 @@ class MySQLClient implements ClientInterface
         $this->logTryingToPush($domainEvent->getAggregateId());
         $this->beginTransaction();
 
+        Assert::that($domainEvent->getDomainEventId())->isInstanceOf(IdInterface::class);
+        Assert::that($domainEvent->getRequestId())->isInstanceOf(IdInterface::class);
+        Assert::that($domainEvent->getCorrelationId())->isInstanceOf(IdInterface::class);
+        Assert::that($domainEvent->getGeneratorCommandId())->isInstanceOf(IdInterface::class);
+
         try {
             $this->pdo->prepare(
                 "INSERT INTO eventstore (
@@ -72,15 +77,15 @@ class MySQLClient implements ClientInterface
                                   :id, :aggregate_id, :aggregate_code, :event_code, :event_version, :event_data, :request_id, :correlation_id, :generator_command_id, :created_at
                       )"
             )->execute([
-                'id' => $domainEvent->getDomainEventId() ? $domainEvent->getDomainEventId()->humanReadable() : $this->uuidFactory->generate()->humanReadable(),
+                'id' => $domainEvent->getDomainEventId()->humanReadable(),
                 'aggregate_id' => $domainEvent->getAggregateId()->humanReadable(),
                 'aggregate_code' => $domainEvent->getAggregateCode(),
                 'event_code' => $domainEvent->getDomainEventCode(),
                 'event_version' => $domainEvent->getDomainEventVersion(),
                 'event_data' => json_encode($domainEvent->toArray()),
-                'request_id' => $domainEvent->getRequestId(),
-                'correlation_id' => $domainEvent->getCorrelationId(),
-                'generator_command_id' => $domainEvent->getGeneratorCommandId(),
+                'request_id' => $domainEvent->getRequestId()->humanReadable(),
+                'correlation_id' => $domainEvent->getCorrelationId()->humanReadable(),
+                'generator_command_id' => $domainEvent->getGeneratorCommandId()->humanReadable(),
                 'created_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s.u'),
             ]);
 

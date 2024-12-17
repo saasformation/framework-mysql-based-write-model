@@ -4,7 +4,6 @@ services:
     arguments:
       $envVarsManager: '@default_env_vars_manager'
       $logger: '@default_logger'
-      $UUIDFactory: '@SaaSFormation\Framework\SharedKernel\Common\Identity\UUIDFactoryInterface'
 
   SaaSFormation\Framework\MySQLBasedWriteModel\Infrastructure\WriteModel\MySQLBasedRepository:
     arguments:

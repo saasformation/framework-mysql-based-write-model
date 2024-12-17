@@ -11,7 +11,7 @@ readonly class MySQLClientProvider implements ClientProviderInterface
 {
     private MySQLClient $mySQLClient;
 
-    public function __construct(private EnvVarsManagerInterface $envVarsManager, LoggerInterface $logger, UUIDFactoryInterface $UUIDFactory)
+    public function __construct(private EnvVarsManagerInterface $envVarsManager, LoggerInterface $logger)
     {
         $mysqlUri = $this->envVarsManager->get('MYSQL_URI');
         $mysqlUsername = $this->envVarsManager->get('MYSQL_USERNAME');
@@ -29,7 +29,7 @@ readonly class MySQLClientProvider implements ClientProviderInterface
             throw new \InvalidArgumentException('MYSQL_PASSWORD must be a string');
         }
 
-        $this->mySQLClient = new MySQLClient($mysqlUri, $mysqlUsername, $mysqlPassword, $logger, $UUIDFactory);
+        $this->mySQLClient = new MySQLClient($mysqlUri, $mysqlUsername, $mysqlPassword, $logger);
     }
 
     public function provide(): MySQLClient

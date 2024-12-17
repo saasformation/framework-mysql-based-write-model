@@ -5,6 +5,7 @@ namespace SaaSFormation\Framework\MySQLBasedWriteModel\Infrastructure\WriteModel
 use Assert\Assert;
 use Psr\Log\LoggerInterface;
 use SaaSFormation\Framework\Contracts\Infrastructure\WriteModel\ClientInterface;
+use SaaSFormation\Framework\SharedKernel\Application\Messages\CommandInterface;
 use SaaSFormation\Framework\SharedKernel\Common\Identity\IdInterface;
 use SaaSFormation\Framework\SharedKernel\Common\Identity\UUIDFactoryInterface;
 use SaaSFormation\Framework\SharedKernel\Domain\AbstractAggregate;
@@ -16,10 +17,10 @@ class MySQLClient implements ClientInterface
     private int $transactionCounter = 0;
 
     public function __construct(
-        readonly string                       $mySQLUri,
-        readonly string                       $mySQLUsername,
-        readonly string                       $mySQLPassword,
-        private readonly LoggerInterface      $logger
+        readonly string                  $mySQLUri,
+        readonly string                  $mySQLUsername,
+        readonly string                  $mySQLPassword,
+        private readonly LoggerInterface $logger
     )
     {
         $this->pdo = new \PDO($mySQLUri, $mySQLUsername, $mySQLPassword);
@@ -94,6 +95,36 @@ class MySQLClient implements ClientInterface
         } catch (\Throwable $e) {
             $this->logFailedToPush($e, $domainEvent->getAggregateId());
             $this->rollbackTransaction();
+            throw new \Exception($e->getMessage());
+        }
+    }
+
+    public function saveCommand(CommandInterface $command): void
+    {
+        Assert::that($command->getCommandId())->isInstanceOf(IdInterface::class);
+        Assert::that($command->getRequestId())->isInstanceOf(IdInterface::class);
+        Assert::that($command->getCorrelationId())->isInstanceOf(IdInterface::class);
+        Assert::that($command->getExecutorId())->isInstanceOf(IdInterface::class);
+
+        try {
+            $this->pdo->prepare(
+                "INSERT INTO commandstore (
+                        id, code, data, request_id, correlation_id, executor_id, status, created_at
+                        ) values (
+                                  :id, :code, :data, :request_id, :correlation_id, :executor_id, :status, :created_at
+                      )"
+            )->execute([
+                'id' => $command->getCommandId()->humanReadable(),
+                'code' => $command->getCommandCode(),
+                'data' => json_encode($command->toArray()),
+                'request_id' => $command->getRequestId()->humanReadable(),
+                'correlation_id' => $command->getCorrelationId()->humanReadable(),
+                'executor_id' => $command->getExecutorId()->humanReadable(),
+                'status' => $command->getStatus()->value,
+                'created_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s.u'),
+            ]);
+
+        } catch (\Throwable $e) {
             throw new \Exception($e->getMessage());
         }
     }

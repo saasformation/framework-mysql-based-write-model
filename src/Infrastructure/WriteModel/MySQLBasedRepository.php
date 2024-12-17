@@ -2,6 +2,7 @@
 
 namespace SaaSFormation\Framework\MySQLBasedWriteModel\Infrastructure\WriteModel;
 
+use SaaSFormation\Framework\SharedKernel\Application\Messages\CommandInterface;
 use SaaSFormation\Framework\SharedKernel\Common\Identity\IdInterface;
 use SaaSFormation\Framework\SharedKernel\Domain\AbstractAggregate;
 use SaaSFormation\Framework\SharedKernel\Domain\Messages\DomainEventInterface;
@@ -19,6 +20,11 @@ readonly class MySQLBasedRepository implements RepositoryInterface
     public function save(DomainEventInterface $domainEvent): void
     {
         $this->client->save($domainEvent);
+    }
+
+    public function saveCommand(CommandInterface $command): void
+    {
+        $this->client->saveCommand($command);
     }
 
     public function hasAggregate(IdInterface $id): bool

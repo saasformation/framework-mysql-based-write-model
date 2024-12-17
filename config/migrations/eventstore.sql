@@ -11,5 +11,6 @@ CREATE TABLE `eventstore` (
                               `created_at` datetime(6) NOT NULL,
                               PRIMARY KEY (`id`),
                               KEY `aggregate_id` (`aggregate_id`),
+                              KEY `request_id` (`request_id`),
                               KEY `created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

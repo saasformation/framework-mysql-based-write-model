@@ -21,4 +21,4 @@ services:
   SaaSFormation\Framework\MySQLBasedWriteModel\UI\Cli\Migrations\MigrateCommand:
     public: true
 
-  SaaSFormation\Framework\Contracts\Domain\WriteModel\RepositoryInterface: '@SaaSFormation\Framework\MySQLBasedWriteModel\Infrastructure\WriteModel\MySQLBasedRepository'
+  SaaSFormation\Framework\SharedKernel\Domain\WriteModel\RepositoryInterface: '@SaaSFormation\Framework\MySQLBasedWriteModel\Infrastructure\WriteModel\MySQLBasedRepository'

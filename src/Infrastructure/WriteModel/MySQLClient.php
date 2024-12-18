@@ -7,8 +7,6 @@ use Psr\Log\LoggerInterface;
 use SaaSFormation\Framework\Contracts\Infrastructure\WriteModel\ClientInterface;
 use SaaSFormation\Framework\SharedKernel\Application\Messages\CommandInterface;
 use SaaSFormation\Framework\SharedKernel\Common\Identity\IdInterface;
-use SaaSFormation\Framework\SharedKernel\Common\Identity\UUIDFactoryInterface;
-use SaaSFormation\Framework\SharedKernel\Domain\AbstractAggregate;
 use SaaSFormation\Framework\SharedKernel\Domain\Messages\DomainEventInterface;
 
 class MySQLClient implements ClientInterface

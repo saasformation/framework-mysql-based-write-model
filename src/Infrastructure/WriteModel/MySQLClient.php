@@ -63,10 +63,10 @@ class MySQLClient implements ClientInterface
         $this->logTryingToPush($domainEvent->getAggregateId());
         $this->beginTransaction();
 
-        Assert::that($domainEvent->getDomainEventId())->isInstanceOf(IdInterface::class);
-        Assert::that($domainEvent->getRequestId())->isInstanceOf(IdInterface::class);
-        Assert::that($domainEvent->getCorrelationId())->isInstanceOf(IdInterface::class);
-        Assert::that($domainEvent->getGeneratorCommandId())->isInstanceOf(IdInterface::class);
+        Assert::that($domainEvent->getDomainEventId())->isInstanceOf(IdInterface::class, "Domain event id is not set at MySQLClient save");
+        Assert::that($domainEvent->getRequestId())->isInstanceOf(IdInterface::class, "Request id is not set at MySQLClient save");
+        Assert::that($domainEvent->getCorrelationId())->isInstanceOf(IdInterface::class, "Correlation id is not set at MySQLClient save");
+        Assert::that($domainEvent->getGeneratorCommandId())->isInstanceOf(IdInterface::class, "Generator command id is not set at MySQLClient save");
 
         try {
             $this->pdo->prepare(
@@ -99,10 +99,10 @@ class MySQLClient implements ClientInterface
 
     public function saveCommand(CommandInterface $command): void
     {
-        Assert::that($command->getCommandId())->isInstanceOf(IdInterface::class);
-        Assert::that($command->getRequestId())->isInstanceOf(IdInterface::class);
-        Assert::that($command->getCorrelationId())->isInstanceOf(IdInterface::class);
-        Assert::that($command->getExecutorId())->isInstanceOf(IdInterface::class);
+        Assert::that($command->getCommandId())->isInstanceOf(IdInterface::class, "Command id is not set at MySQLClient saveCommand");
+        Assert::that($command->getRequestId())->isInstanceOf(IdInterface::class, "Request id is not set at MySQLClient saveCommand");
+        Assert::that($command->getCorrelationId())->isInstanceOf(IdInterface::class, "Correlation id is not set at MySQLClient saveCommand");
+        Assert::that($command->getExecutorId())->isInstanceOf(IdInterface::class, "Executor id is not set at MySQLClient saveCommand");
 
         try {
             $this->pdo->prepare(
